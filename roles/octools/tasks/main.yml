@@ -1,15 +1,15 @@
 ---
 - name: create oc {{ projectname }}-dev
-  command: oadm new-project {{ projectname }}-dev --node-selector="site=dev"
+  command: oadm new-project {{ projectname }}-dev --node-selector="env=test"
 
 - name: create oc {{ projectname }}-test
-  command: oadm new-project {{ projectname }}-test --node-selector="site=test"
+  command: oadm new-project {{ projectname }}-test --node-selector="env=qa"
 
-#- name: create oc {{ projectname }}-prod
-#  command: oadm new-project {{ projectname }}-prod --node-selector="site=prod"
+- name: create oc {{ projectname }}-build
+  command: oadm new-pronect {{ projectname }}-build --node-selector="type=builder"
 
 - name: create oc {{ projectname }}-jenkins
-  command: oadm new-project {{ projectname }}-jenkins --node-selector="site=dev"
+  command: oadm new-project {{ projectname }}-jenkins --node-selector="env=test"
 
 - name: Add user as admin for {{ projectname }}-dev
   command: oc policy add-role-to-user admin {{ username }} -n {{ projectname }}-dev
@@ -17,17 +17,17 @@
 - name: Add user as admin for {{ projectname }}-test
   command: oc policy add-role-to-user admin {{ username }} -n {{ projectname }}-test
 
-#- name: Add user as admin for {{ projectname }}-prod
-#  command: oc policy add-role-to-user admin {{ username }} -n {{ projectname }}-prod
+- name: Add user as admin for {{ projectname }}-build
+  command: oc policy add-role-to-user admin {{ username }} -n {{ projectname }}-build
 
 - name: Add user as admin for {{ projectname }}-jenkins
   command: oc policy add-role-to-user admin {{ username }} -n {{ projectname }}-jenkins
 
-#- name: Add project pipeline to {{ projectname }}-dev
-#  command: oc policy add-role-to-group system:image-puller system:serviceaccount:{{ projectname }}-prod -n {{ projectname }}-dev
-
 - name: Add project pipeline to {{ projectname }}-dev
   command: oc policy add-role-to-group system:image-puller system:serviceaccount:{{ projectname }}-test -n {{ projectname }}-dev
+
+- name: Add project pipeline to {{ projectname }}-build
+  command: oc policy add-role-to-group system:image-puller system:serviceaccount:{{ projectname }}-dev -n {{projectname }}-build
 
 - name: Add jenkins to project {{ projectname }}-jenkins
   command: oc new-app jenkins-persistent -n {{ projectname }}-jenkins
@@ -38,5 +38,9 @@
 - name: Add Jenkins role to {{ projectname }}-test
   command: oc policy add-role-to-user edit system:serviceaccount:{{ projectname }}-jenkins:jenkins -n {{ projectname }}-test
 
-#- name: Add Jenkins role to {{ projectname }}-prod
-#  command: oc policy add-role-to-user edit system:serviceaccount:{{ projectname }}-jenkins:jenkins -n {{ projectname }}-prod
+- name: Add Jenkins role to {{ projectname }}-build
+  command: oc policy add-role-to-user edit system:serviceaccount:{{ projectname }}-jenkins:jenkins -n {{ projectname }}-build
+
+- name: Startup Jenkins pod
+  command: oc new-app --template=jenkins-persistent {{ projectname }}-jenkins -n {{ projectname }}-jenkins
+
