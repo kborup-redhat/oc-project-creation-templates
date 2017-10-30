@@ -1,0 +1,9 @@
+---
+- name: create oc {{ projectname }}
+  command: oadm new-project {{ projectname }} --node-selector="site={{ ocpenv }}"
+
+- name: Add user to project
+  command: oc policy add-role-to-user admin {{ username }} -n {{ projectname }}
+
+- name: Create postgres application for {{ username }}
+  command: oc new-app --template=postgresql-persistent -p POSTGRESQL_USER={{ dbuser }} -p POSTGRESQL_PASSWORD={{ dbpass }} -p POSTGRESQL_DATABASE={{ dbname }} -p VOLUME_CAPACITY={{ dbsize }}Gi -p DATABASE_SERVICE_NAME={{ dbuser }}-pgsql -n {{ projectname }}

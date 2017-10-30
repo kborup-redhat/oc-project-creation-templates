@@ -1,0 +1,7 @@
+---
+- name: create oc {{ projectname }}
+  command: oadm new-project {{ projectname }} --node-selector="site={{ label }}"
+
+- name: Add user as admin for {{ projectname }}
+  command: oc policy add-role-to-user admin {{ username }} -n {{ projectname }}
+

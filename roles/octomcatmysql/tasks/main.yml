@@ -1,0 +1,12 @@
+---
+- name: create oc {{ projectname }}
+  command: oadm new-project {{ projectname }} --node-selector="site={{ ocpenv }}"
+
+- name: Add user to project
+  command: oc policy add-role-to-user admin {{ username }} -n {{ projectname }}
+
+- name: Create mysql application for {{ username }}
+  command: - name: Create mysql application for {{ username }}
+  command: oc new-app --template=jws30-tomcat8-mysql-persistent-s2i -p MYSQL_USER={{ dbuser }} -p MYSQL_PASSWORD={{ dbpass }} -p MYSQL_DATABASE={{ dbname }} -p VOLUME_CAPACITY={{ dbsize }}Gi -p DATABASE_SERVICE_NAME={{ dbuser }}-mysql MYSQL_VERSION={{ dbver }} -n {{ projectname }}
+
+
